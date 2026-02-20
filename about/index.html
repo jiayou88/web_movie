@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>我的私人影院 - 播放器</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            background-image: url('../assets/images/76s0mZIiRT73dfF8u5nLE57c95trweFE.webp');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            z-index: -1;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: #333;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #333;
+        }
+
+        .navbar-brand i {
+            color: #667eea;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 20px;
+        }
+
+        .navbar-menu a {
+            color: #333;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .navbar-menu a:hover {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .player-section {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .player-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            background: rgba(0,0,0,0.5);
+        }
+
+        #player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #player iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .video-info {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-top: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .video-info h2 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .list-section {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .list-header h3 {
+            color: #333;
+        }
+
+        .video-count {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .video-card {
+            cursor: pointer;
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .video-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .video-card.active {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
+        }
+
+        .video-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        .video-card .card-info {
+            padding: 12px;
+        }
+
+        .video-card h4 {
+            font-size: 16px;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #333;
+            background: rgba(255,255,255,0.5);
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .platform-tabs {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .platform-tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #333;
+            transition: all 0.3s;
+        }
+
+        .platform-tab:hover {
+            background: rgba(102, 126, 234, 0.3);
+        }
+
+        .platform-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #5a67d8;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .navbar-menu {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <i class="fas fa-film"></i>
+            <span>我的私人影院</span>
+        </div>
+        <div class="navbar-menu">
+            <a href="../index.html"><i class="fas fa-home"></i>首页</a>
+            <a href="../login.html" id="adminBtn"><i class="fas fa-lock"></i>后台管理</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="player-section">
+            <div class="player-wrapper">
+                <div id="player"></div>
+            </div>
+            <div class="video-info" id="videoInfo">
+                <h2>请选择一个视频</h2>
+            </div>
+        </div>
+
+        <div class="list-section">
+            <div class="list-header">
+                <h3>📋 视频列表</h3>
+                <span class="video-count" id="videoCount">0 个视频</span>
+            </div>
+            <div class="platform-tabs" id="platformTabs"></div>
+            <div class="video-grid" id="videoGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const API_BASE = 'https://api.wnys.eu.cc';
+            let allVideos = [];
+            let currentVideo = null;
+            let currentPlatform = 'all';
+
+            async function init() {
+                await checkLoginStatus();
+                await loadVideos();
+                setupEventListeners();
+            }
+
+            async function checkLoginStatus() {
+                const isLoggedIn = sessionStorage.getItem('admin_logged_in') === 'true';
+                const adminBtn = document.getElementById('adminBtn');
+                if (adminBtn) {
+                    if (isLoggedIn) {
+                        adminBtn.innerHTML = '<i class="fas fa-cog"></i> 管理后台';
+                        adminBtn.href = '../admin.html';
+                    }
+                }
+            }
+
+            async function loadVideos() {
+                try {
+                    const response = await fetch(`${API_BASE}/api/videos`);
+                    const data = await response.json();
+                    allVideos = data.videos || [];
+                    
+                    document.getElementById('videoCount').textContent = `${allVideos.length} 个视频`;
+                    
+                    renderPlatformTabs();
+                    renderVideoGrid();
+                    
+                    const videoId = new URLSearchParams(window.location.search).get('id') || localStorage.getItem('currentVideoId');
+                    const video = allVideos.find(v => v.id === videoId) || allVideos[0];
+                    if (video) {
+                        playVideo(video, false);
+                    }
+                    
+                } catch (error) {
+                    console.error('加载失败:', error);
+                }
+            }
+
+            function renderPlatformTabs() {
+                const platforms = ['all', ...new Set(allVideos.map(v => v.platform).filter(Boolean))];
+                const html = platforms.map(p => 
+                    `<button class="platform-tab ${currentPlatform === p ? 'active' : ''}" data-platform="${p}">${p === 'all' ? '全部' : p}</button>`
+                ).join('');
+                document.getElementById('platformTabs').innerHTML = html;
+            }
+
+            function renderVideoGrid() {
+                const grid = document.getElementById('videoGrid');
+                
+                if (allVideos.length === 0) {
+                    grid.innerHTML = '<div class="empty-state"><i class="fas fa-film"></i><p>暂无视频</p></div>';
+                    return;
+                }
+                
+                let html = '';
+                allVideos.forEach(video => {
+                    html += `
+                    <div class="video-card" data-video-id="${video.id}" data-platform="${video.platform || '其他'}">
+                        <img src="${video.cover || 'https://via.placeholder.com/320x180'}" alt="${video.title}" loading="lazy">
+                        <div class="card-info">
+                            <h4>${video.title}</h4>
+                        </div>
+                    </div>
+                    `;
+                });
+                
+                grid.innerHTML = html;
+                filterVideos();
+            }
+
+            function filterVideos() {
+                const cards = document.querySelectorAll('.video-card');
+                cards.forEach(card => {
+                    if (currentPlatform === 'all' || card.dataset.platform === currentPlatform) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+
+            function playVideo(video, updateUrl = true) {
+                if (currentVideo?.id === video.id) return;
+                
+                currentVideo = video;
+                
+                document.querySelectorAll('.video-card').forEach(card => {
+                    card.classList.toggle('active', card.dataset.videoId === video.id);
+                });
+                
+                const player = document.getElementById('player');
+                let embedUrl = video.url;
+                
+                // YouTube 视频处理
+                if (video.url.includes('youtube.com') || video.url.includes('youtu.be')) {
+                    const match = video.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?#]+)/);
+                    if (match) {
+                        // 关键：添加所有全屏相关的参数
+                        embedUrl = `https://www.youtube.com/embed/${match[1]}?autoplay=1&fs=1`;
+                    }
+                }
+                
+                // 创建iframe并确保全屏属性
+                player.innerHTML = `<iframe 
+                    src="${embedUrl}" 
+                    frameborder="0" 
+                    allowfullscreen 
+                    webkitallowfullscreen 
+                    mozallowfullscreen 
+                    allow="autoplay; fullscreen">
+                </iframe>`;
+                
+                document.getElementById('videoInfo').innerHTML = `<h2>${video.title}</h2>`;
+                
+                localStorage.setItem('currentVideoId', video.id);
+                
+                if (updateUrl) {
+                    const url = new URL(window.location);
+                    url.searchParams.set('id', video.id);
+                    window.history.pushState({}, '', url);
+                }
+            }
+
+            function setupEventListeners() {
+                document.getElementById('platformTabs').addEventListener('click', (e) => {
+                    const tab = e.target.closest('.platform-tab');
+                    if (tab) {
+                        document.querySelectorAll('.platform-tab').forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                        currentPlatform = tab.dataset.platform;
+                        filterVideos();
+                    }
+                });
+                
+                document.getElementById('videoGrid').addEventListener('click', (e) => {
+                    const card = e.target.closest('.video-card');
+                    if (card) {
+                        const video = allVideos.find(v => v.id === card.dataset.videoId);
+                        if (video) playVideo(video);
+                    }
+                });
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
