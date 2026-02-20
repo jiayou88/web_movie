@@ -1,0 +1,7 @@
+name = "webtool-api"
+main = "src/index.js"
+compatibility_date = "2026-02-19"
+
+[[kv_namespaces]]
+binding = "WEBTOOL_KV"
+id = "2defc87a68914ebabd6e15ef6d3a3fbf"
