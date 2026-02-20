@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的私人影单</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .movie-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        /* 头部 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+            color: white;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .header h1 {
+            font-size: 42px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            animation: slideInLeft 0.8s ease;
+        }
+        
+        .header h1 i {
+            margin-right: 15px;
+            color: #ffd700;
+        }
+        
+        .admin-btn {
+            padding: 12px 30px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 2px solid rgba(255,255,255,0.3);
+            animation: slideInRight 0.8s ease;
+        }
+        
+        .admin-btn:hover {
+            background: white;
+            color: #667eea;
+            border-color: white;
+            transform: translateY(-2px);
+        }
+        
+        /* 主菜单 - 平台导航 */
+        .platform-nav {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 60px;
+            padding: 10px;
+            margin-bottom: 40px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            animation: fadeIn 1s ease;
+        }
+        
+        .platform-item {
+            padding: 12px 30px;
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .platform-item:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .platform-item.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .platform-count {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        
+        .platform-item.active .platform-count {
+            background: #667eea;
+            color: white;
+        }
+        
+        /* 视频列表 */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+            animation: fadeInUp 1s ease;
+        }
+        
+        .video-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .video-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .video-cover {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+        }
+        
+        .video-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .video-card:hover .video-cover img {
+            transform: scale(1.1);
+        }
+        
+        .video-cover .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .video-card:hover .play-overlay {
+            opacity: 1;
+        }
+        
+        .play-overlay i {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667eea;
+            font-size: 24px;
+        }
+        
+        .video-info {
+            padding: 15px;
+        }
+        
+        .video-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .video-platform {
+            font-size: 12px;
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+        
+        .video-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #999;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+        
+        .video-progress {
+            color: #48bb78;
+        }
+        
+        /* 统计卡片 */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+        
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            border-radius: 20px;
+            padding: 25px;
+            color: white;
+            text-align: center;
+            animation: fadeInUp 1s ease;
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        /* 加载状态 */
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: white;
+            font-size: 18px;
+        }
+        
+        .loading i {
+            margin-right: 10px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: white;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            grid-column: 1 / -1;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .empty-state p {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+        }
+        
+        /* 动画 */
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 32px;
+            }
+            
+            .platform-nav {
+                border-radius: 30px;
+                padding: 8px;
+            }
+            
+            .platform-item {
+                padding: 8px 20px;
+                font-size: 14px;
+            }
+            
+            .video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="movie-container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>
+                <i class="fas fa-film"></i>
+                我的私人影单
+            </h1>
+            <a href="/login.html" class="admin-btn">
+                <i class="fas fa-cog"></i> 后台管理
+            </a>
+        </div>
+        
+        <!-- 统计卡片 -->
+        <div class="stats-cards" id="statsCards">
+            <div class="stat-card">
+                <div class="stat-number" id="totalVideos">0</div>
+                <div class="stat-label">总视频数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalPlatforms">0</div>
+                <div class="stat-label">视频平台</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalWatchTime">0</div>
+                <div class="stat-label">累计观看(小时)</div>
+            </div>
+        </div>
+        
+        <!-- 平台导航 -->
+        <div class="platform-nav" id="platformNav">
+            <div class="platform-item active" data-platform="all">
+                <i class="fas fa-globe"></i>
+                全部
+                <span class="platform-count" id="allCount">0</span>
+            </div>
+            <!-- 其他平台动态加载 -->
+        </div>
+        
+        <!-- 视频列表 -->
+        <div class="video-grid" id="videoGrid">
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i> 加载影单...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://wnys.eu.cc/';
+        let allVideos = [];
+        let currentPlatform = 'all';
+        
+        // ========== 加载数据 ==========
+        async function loadData() {
+            try {
+                // 获取视频列表
+                const response = await fetch(`${API_BASE}/api/videos`);
+                const data = await response.json();
+                allVideos = data.videos || [];
+                
+                // 获取平台统计
+                const statsResponse = await fetch(`${API_BASE}/api/videos/stats`);
+                const stats = await statsResponse.json();
+                
+                updateUI(stats);
+                renderVideos();
+                
+            } catch (error) {
+                console.error('加载失败:', error);
+                document.getElementById('videoGrid').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>加载失败，请刷新重试</p>
+                        <button onclick="location.reload()" class="btn">刷新</button>
+                    </div>
+                `;
+            }
+        }
+        
+        // ========== 更新UI ==========
+        function updateUI(stats) {
+            // 更新统计卡片
+            document.getElementById('totalVideos').textContent = allVideos.length;
+            
+            const platformCount = Object.keys(stats).length || 1;
+            document.getElementById('totalPlatforms').textContent = platformCount;
+            
+            // 模拟累计观看时间（可以后续从KV读取）
+            document.getElementById('totalWatchTime').textContent = Math.floor(allVideos.length * 1.5);
+            
+            // 更新全部计数
+            document.getElementById('allCount').textContent = allVideos.length;
+            
+            // 渲染平台导航
+            renderPlatformNav(stats);
+        }
+        
+        // ========== 渲染平台导航 ==========
+        function renderPlatformNav(stats) {
+            const nav = document.getElementById('platformNav');
+            
+            // 清除除了"全部"以外的项
+            while (nav.children.length > 1) {
+                nav.removeChild(nav.lastChild);
+            }
+            
+            // 添加平台项
+            Object.keys(stats).sort().forEach(platform => {
+                const item = document.createElement('div');
+                item.className = 'platform-item';
+                item.dataset.platform = platform;
+                item.innerHTML = `
+                    <i class="fas fa-tag"></i>
+                    ${escapeHtml(platform)}
+                    <span class="platform-count">${stats[platform]}</span>
+                `;
+                item.onclick = () => filterByPlatform(platform);
+                nav.appendChild(item);
+            });
+        }
+        
+        // ========== 渲染视频列表 ==========
+        function renderVideos() {
+            const filtered = currentPlatform === 'all' 
+                ? allVideos 
+                : allVideos.filter(v => v.platform === currentPlatform);
+            
+            const grid = document.getElementById('videoGrid');
+            
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-film"></i>
+                        <p>${currentPlatform === 'all' ? '影单还是空的，快去后台添加视频吧' : '该平台暂无视频'}</p>
+                        <a href="/login.html" class="btn">
+                            <i class="fas fa-plus"></i> 去添加
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = filtered.map(video => `
+                <a href="/about/?id=${video.id}" class="video-card">
+                    <div class="video-cover">
+                        ${video.cover ? 
+                            `<img src="${video.cover}" alt="${escapeHtml(video.title)}">` : 
+                            `<div style="width:100%;height:100%;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);display:flex;align-items:center;justify-content:center;color:white;font-size:48px;">
+                                <i class="fas fa-film"></i>
+                            </div>`
+                        }
+                        <div class="play-overlay">
+                            <i class="fas fa-play"></i>
+                        </div>
+                    </div>
+                    <div class="video-info">
+                        <div class="video-title">
+                            ${escapeHtml(video.title)}
+                            <span class="video-platform">${escapeHtml(video.platform || '其他')}</span>
+                        </div>
+                        <div class="video-meta">
+                            <span><i class="far fa-clock"></i> ${video.addedAt ? new Date(video.addedAt).toLocaleDateString() : '最近'}</span>
+                            ${video.progress ? 
+                                `<span class="video-progress"><i class="fas fa-play"></i> ${formatTime(video.progress.currentTime)}</span>` : 
+                                '<span>未观看</span>'
+                            }
+                        </div>
+                    </div>
+                </a>
+            `).join('');
+        }
+        
+        // ========== 按平台筛选 ==========
+        function filterByPlatform(platform) {
+            currentPlatform = platform;
+            
+            // 更新激活状态
+            document.querySelectorAll('.platform-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.platform === platform);
+            });
+            
+            renderVideos();
+        }
+        
+        // ========== 工具函数 ==========
+        function formatTime(seconds) {
+            if (!seconds) return '0:00';
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            
+            if (h > 0) {
+                return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            }
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+        
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+        
+        // ========== 初始化 ==========
+        window.addEventListener('load', loadData);
+    </script>
+</body>
+</html>

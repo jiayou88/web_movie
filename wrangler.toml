@@ -1,0 +1,12 @@
+name = "webtool0"
+compatibility_date = "2026-02-19"
+main = "index.js"  # 添加这行
+
+[env.production]
+routes = [
+  { pattern = "wnys.eu.cc/*", zone_id = "你的zone_id" }
+]
+
+[assets]
+directory = "."
+binding = "ASSETS"  # 现在可以保留 binding 
